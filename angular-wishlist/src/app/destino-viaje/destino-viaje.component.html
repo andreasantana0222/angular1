@@ -8,21 +8,27 @@
 											<h3>{{destino.nombre}}</h3>
 											<p>Servicios</p>
 												<ul>
-														<li *ngFor="let s of destino.servicios">
-															<span [ngSwitch]="s">
-																<i *ngSwitchCase="'desayuno'" style="color: red;">{{s}}</i>
-																<i *ngSwitchDefault>{{s}}</i>
+														<li *ngFor="let s of destino.servicios;">
+															<span class="container" [ngSwitch]="s">
+																<i *ngSwitchCase="'desayuno'" style="color: red;">{{ s }}</i>
+																<i *ngSwitchDefault>{{ s }}</i>
 															</span>
 														</li>
 												</ul>
 
-												<a	href="#"	class="btn-card" (click)="ir()">Ir!</a>
+												<div>
+														<a href="#" (click)="voteUp()"><i class="material-icons md-18">thumb_up</i></a>
+														<a href="#" (click)="voteDown()"><i class="material-icons md-18">thumb_down</i></a>
+														{{ destino.votes }}
+												</div>
+
+												<a	href="#"	class="btn-card" (click)="ir()">IR!</a>
 												<!--span [style.display]="destino.isSelected()?'':'none'" media="screen"-->
 												<span *ngIf="destino.isSelected()">
 													<span ngNonBindable>
-															 {{PREFERIDO}}
+															 {{ PREFERIDO }}
 													</span>
 												</span>
-												<a [routerLink]="['/destino']">Ver Detalle</a>
+												<a [routerLink]="['/destino', destino.id]">Ver!</a>
 							</div>
 			</div>

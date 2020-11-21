@@ -1,10 +1,12 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import {DestinoViaje} from './../models/destino-viaje.model';
+// VALIDATOR: Importo modulos para agrupar controles
 import {FormGroup,FormBuilder, Validators, FormControl, ValidatorFn} from '@angular/forms';
+
 import {fromEvent} from 'rxjs';
 import {map, filter, debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {ajax} from 'rxjs/ajax';
 
+import {DestinoViaje} from './../models/destino-viaje.model';
 
 @Component({
   selector: 'app-form-destino-viaje',
@@ -14,10 +16,15 @@ import {ajax} from 'rxjs/ajax';
 
 export class FormDestinoViajeComponent implements OnInit {
   @Output() onItemAdded: EventEmitter<DestinoViaje>;
+  // VALIDATOR: Declaro una variable
+  //para el grupo de controles que será validado
   fg: FormGroup;
   minLongitud=3;
+
+  // OBSERVABLE declaro un array de una cadena
   searchResults: string[];
 
+  // VALIDATOR: armo el formulario con FormBuilder
   constructor(fb: FormBuilder) {
     this.onItemAdded=new EventEmitter();
     this.fg=fb.group({
@@ -35,7 +42,9 @@ export class FormDestinoViajeComponent implements OnInit {
   }
 
   ngOnInit(){
+    // OBSERVABLE valida cuando ingresan un texto
     let elemNombre=<HTMLInputElement>document.getElementById('nombre');
+    // OBSERVABLE espera el evento del ingreso de una tecla
     fromEvent(elemNombre, 'input')
     .pipe(
       map((e: KeyboardEvent) => (e.target as HTMLInputElement).value),

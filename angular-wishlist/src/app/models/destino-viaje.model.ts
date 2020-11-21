@@ -1,9 +1,12 @@
+import { v4 as uuid } from "uuid";
+
 export class DestinoViaje{
   private selected: boolean;
   public servicios: string[];
+  id= uuid();
   public position: number;
 
-  constructor(public nombre: string, public url: string){
+  constructor(public nombre: string, public url: string, public votes: number = 0){
     this.servicios=['pileta','desayuno'];
   }
 
@@ -14,5 +17,13 @@ export class DestinoViaje{
 
   setSelected(s:boolean){
     this.selected=s;
+  }
+
+  voteUp(){
+    this.votes++;
+  }
+
+  voteDown() {
+    this.votes--;
   }
 }

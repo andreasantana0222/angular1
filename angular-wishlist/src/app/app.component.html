@@ -3,6 +3,7 @@
   <div class="page-header">
     <div class="container">
       <h1>Ruteo Simple</h1>
+      <!--  ROUTES: puntos de menú que suplen a href-->
       <div class="navLinks">
         <a [routerLink]="['/home']">Home</a> &nbsp;
         <a [routerLink]="['/destino']">Destino</a>
@@ -18,10 +19,11 @@
       {{ title }}
     </h1>
   </div>
-
+<!--  ROUTES: Es el tag que se modifica de acuerdo al modulo de destino-->
   <router-outlet> </router-outlet>
+
 </div>
 
 <hr class="mb-5">
 
-Fecha: {{time | async}}
+Fecha: {{ time | async }}

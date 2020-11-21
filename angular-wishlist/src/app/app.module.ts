@@ -1,9 +1,14 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+
+// Importo el Modulo de Ruteo
 import { RouterModule, Routes } from '@angular/router';
+
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreModule as NgRxStoreModule, ActionReducerMap } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { environment } from '../environments/environment'; // Angular CLI environment
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,7 +24,7 @@ DestinosViajesEffects
  } from './models/destinos-viajes-state.model';
 
 
-
+// ROUTES: Declaro las rutas
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch:'full' },
   { path: 'home', component: ListaDestinosComponent },
@@ -36,7 +41,7 @@ const reducers: ActionReducerMap<AppState> = {
   destinos: reducerDestinosViajes
 };
 
-let reducersInitialState = {
+const reducersInitialState = {
   destinos: initializeDestinosViajesState()
 };
 // redux fin init
@@ -50,20 +55,24 @@ let reducersInitialState = {
     ListaDestinosComponent,
     DestinoDetalleComponent,
     FormDestinoViajeComponent,
-    NgRxStoreModule
+    //NgRxStoreModule
   ],
   imports: [
     BrowserModule,
+    // ROUTES: Se registran las rutas en el componente
     RouterModule.forRoot(routes),
+
     ReactiveFormsModule,
     FormsModule,
     AppRoutingModule,
     NgRxStoreModule.forRoot(reducers, {initialState: reducersInitialState }),
-    EffectsModule.forRoot ([DestinosViajesEffects])
+    EffectsModule.forRoot ([DestinosViajesEffects]),
+    StoreDevtoolsModule.instrument()
   ],
   providers: [
     DestinosApiClient
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
