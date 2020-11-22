@@ -1,9 +1,11 @@
 import { Component, OnInit, Input, HostBinding, EventEmitter, Output } from '@angular/core';
-import { DestinoViaje } from './../models/destino-viaje.model';
-import { DestinosApiClient } from './../models/destinos-api-client.model';
-import { AppState } from '../app.module';
-import { VoteUpAction, VoteDownAction } from '../models/destinos-viajes-state.model';
 import { Store } from '@ngrx/store';
+
+import { DestinoViaje } from './../../models/destino-viaje.model';
+import { DestinosApiClient } from './../../models/destinos-api-client.model';
+import { AppState } from '../../app.module';
+import { VoteUpAction, VoteDownAction } from '../../models/destinos-viajes-state.model';
+
 
 @Component({
   selector: 'app-destino-viaje',

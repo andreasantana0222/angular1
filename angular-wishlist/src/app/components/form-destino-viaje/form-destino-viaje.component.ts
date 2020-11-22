@@ -2,11 +2,13 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 // VALIDATOR: Importo modulos para agrupar controles
 import {FormGroup,FormBuilder, Validators, FormControl, ValidatorFn} from '@angular/forms';
 
+// OBSERVABLE se importa el módulo que queda esperando el ingreso de una letra
 import {fromEvent} from 'rxjs';
+// OBSERVABLE se importan operaciones en serie
 import {map, filter, debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {ajax} from 'rxjs/ajax';
 
-import {DestinoViaje} from './../models/destino-viaje.model';
+import {DestinoViaje} from './../../models/destino-viaje.model';
 
 @Component({
   selector: 'app-form-destino-viaje',
