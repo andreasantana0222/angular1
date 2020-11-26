@@ -30,6 +30,7 @@ import { VuelosComponent } from './components/vuelos/vuelos-component/vuelos.com
 import { VuelosMainComponent } from './components/vuelos/vuelos-main-component/vuelos-main.component';
 import { VuelosMasInfoComponent } from './components/vuelos/vuelos-mas-info-component/vuelos-mas-info.component';
 import { VuelosDetalleComponent } from './components/vuelos/vuelos-detalle-component/vuelos-detalle.component';
+import { ReservasModule } from './reservas/reservas.module';
 
 
 // ROUTES declaro las rutas hijas primero
@@ -41,7 +42,7 @@ export const childrenRoutesVuelos: Routes = [
   { path: 'mas-info', component: VuelosMasInfoComponent },
 
   // ROUTES se envia el id como parametro dentro de params
-  { path: 'vuelos/:id', component: VuelosDetalleComponent }
+  { path: ':id', component: VuelosDetalleComponent }
 
 ]
 
@@ -67,6 +68,7 @@ const routes: Routes = [
     canActivate: [UsuarioLogueadoGuard],
     children: childrenRoutesVuelos
   }
+
 ];
 
 
@@ -98,8 +100,7 @@ const reducersInitialState = {
     LoginComponent,
     ProtectedComponent,
     //NgRxStoreModule,
-    LoginComponent,
-    ProtectedComponent,
+
     VuelosComponent,
     VuelosMainComponent,
     VuelosMasInfoComponent,
@@ -116,7 +117,10 @@ const reducersInitialState = {
     AppRoutingModule,
     NgRxStoreModule.forRoot(reducers, {initialState: reducersInitialState }),
     EffectsModule.forRoot ([DestinosViajesEffects]),
-    StoreDevtoolsModule.instrument()
+    StoreDevtoolsModule.instrument(),
+
+    // módulo RESERVAS
+    ReservasModule
   ],
   providers: [
     DestinosApiClient, AuthService, UsuarioLogueadoGuard

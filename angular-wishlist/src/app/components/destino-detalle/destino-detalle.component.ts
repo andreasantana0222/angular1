@@ -17,7 +17,8 @@ export class DestinoDetalleComponent implements OnInit {
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    this.destino=null;
+    //this.destino.position= id;
+    //this.destinosApiClient.elegir(this.destino);
   }
 
 }
