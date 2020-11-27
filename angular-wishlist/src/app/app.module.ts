@@ -5,6 +5,9 @@ import { Store }  from '@ngrx/store';
 // Importo el Modulo de Ruteo
 import { RouterModule, Routes } from '@angular/router';
 
+//Base de datos
+import Dexie from 'dexie';
+
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreModule as NgRxStoreModule, ActionReducerMap } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -37,6 +40,7 @@ import { VuelosMainComponent } from './components/vuelos/vuelos-main-component/v
 import { VuelosMasInfoComponent } from './components/vuelos/vuelos-mas-info-component/vuelos-mas-info.component';
 import { VuelosDetalleComponent } from './components/vuelos/vuelos-detalle-component/vuelos-detalle.component';
 import { ReservasModule } from './reservas/reservas.module';
+import { DestinoViaje } from './models/destino-viaje.model';
 
 
 // NODE.JS sin persistencia y sin deploy
@@ -126,6 +130,25 @@ class AppLoadService {
 }
 // APP fin
 
+
+// dexie db init
+@Injectable({
+  providedIn: 'root'
+})
+
+export class MyDatabase extends Dexie {
+  destinos: Dexie.Table<DestinoViaje, number>;
+  constructor () {
+    super ('MyDatabase');
+    // primer version de la base de datos
+    this.version(1).stores({
+      destinos: '++id, nombre, url',
+    });
+  }
+}
+export const db = new MyDatabase();
+// dexie db fin
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -159,7 +182,10 @@ class AppLoadService {
     ReservasModule,
 
     // NODE.JS importo la librería para leer el REST
-    HttpClientModule
+    HttpClientModule,
+
+    // Base de datos dexie
+    MyDatabase
   ],
   // INJECTOR vamos a inyectar la información del Api DestinosApiClient
   // por lo que se quita la importación y el provider

@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 // NODE.JS importo la librería para leer el REST
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest, HttpResponse } from "@angular/common/http";
 
-import { AppState, AppConfig, APP_CONFIG } from '../app.module';
+import { AppState, AppConfig, APP_CONFIG, db } from '../app.module';
 import { DestinoViaje } from './destino-viaje.model';
 import { NuevoDestinoAction,
   ElegidoFavoritoAction,
@@ -48,6 +48,12 @@ export class DestinosApiClient{
       // 200  es el resultado de si el servidor está funcionando
       if (data.status === 200) {
         this.store.dispatch(new NuevoDestinoAction(d));
+        const myDb = db;
+        //tabla destinos agregamos destino nuevo
+        myDb.destinos.add(d);
+        console.log('todos los destinos de la db!');
+        // consulto la tabla como "toArray" no me devuelve un array
+        myDb.destinos.toArray().then(destinos => console.log(destinos));
       }
     });
   }
