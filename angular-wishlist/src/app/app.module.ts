@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, Inject, InjectionToken, Injectable, APP_INITIALIZER, forwardRef  } from '@angular/core';
+import { Store }  from '@ngrx/store';
 
 // Importo el Modulo de Ruteo
 import { RouterModule, Routes } from '@angular/router';
@@ -8,6 +9,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { StoreModule as NgRxStoreModule, ActionReducerMap } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+// NODE.JS importo la librería para leer el REST
+import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest } from "@angular/common/http";
 
 import { environment } from '../environments/environment'; // Angular CLI environment
 import { AppRoutingModule } from './app-routing.module';
@@ -15,12 +18,15 @@ import { AppComponent } from './app.component';
 import { DestinoViajeComponent } from './components/destino-viaje/destino-viaje.component';
 import { ListaDestinosComponent } from './components/lista-destinos/lista-destinos.component';
 import { DestinoDetalleComponent } from './components/destino-detalle/destino-detalle.component';
-import { DestinosApiClient } from './models/destinos-api-client.model';
+// INJECTOR vamos a inyectar la información del Api DestinosApiClient
+// por lo que se quita la importación y el provider
+// import { DestinosApiClient } from './models/destinos-api-client.model';
 import { FormDestinoViajeComponent } from './components/form-destino-viaje/form-destino-viaje.component';
 import { DestinosViajesState,
   reducerDestinosViajes,
 initializeDestinosViajesState,
-DestinosViajesEffects
+DestinosViajesEffects,
+InitMyDataAction
  } from './models/destinos-viajes-state.model';
 import { LoginComponent } from './components/login/login/login.component';
 import { ProtectedComponent } from './components/protected/protected/protected.component';
@@ -31,6 +37,20 @@ import { VuelosMainComponent } from './components/vuelos/vuelos-main-component/v
 import { VuelosMasInfoComponent } from './components/vuelos/vuelos-mas-info-component/vuelos-mas-info.component';
 import { VuelosDetalleComponent } from './components/vuelos/vuelos-detalle-component/vuelos-detalle.component';
 import { ReservasModule } from './reservas/reservas.module';
+
+
+// NODE.JS sin persistencia y sin deploy
+// app config
+export interface AppConfig {
+  apiEndpoint: String;
+}
+
+const APP_CONFIG_VALUE: AppConfig = {
+  apiEndpoint: 'http://localhost:3000'
+};
+
+export const APP_CONFIG = new InjectionToken<AppConfig>('app.config');
+//fin app config
 
 
 // ROUTES declaro las rutas hijas primero
@@ -88,7 +108,23 @@ const reducersInitialState = {
 };
 // REDUX fin init
 
-
+// NODE.JS importo codigo para leer el REST
+// APP init
+export function init_app (appLoadService: AppLoadService): () => Promise<any> {
+  return () => appLoadService.initializeDestinosViajesState();
+}
+@Injectable()
+class AppLoadService {
+  constructor ( private store: Store<AppState>, private http: HttpClient) {}
+  async initializeDestinosViajesState(): Promise<any> {
+    const headers: HttpHeaders = new HttpHeaders ({ 'X-API-TOKEN': 'token-seguridad' });
+    const req = new HttpRequest ('GET', APP_CONFIG_VALUE.apiEndpoint + '/my', { headers: headers });
+    // al ser asíncrono, se espera la respuesta "await" en lugar de subscribe
+    const response: any = await this.http.request(req).toPromise();
+    this.store.dispatch(new InitMyDataAction(response.body));
+  }
+}
+// APP fin
 
 @NgModule({
   declarations: [
@@ -120,10 +156,21 @@ const reducersInitialState = {
     StoreDevtoolsModule.instrument(),
 
     // módulo RESERVAS
-    ReservasModule
+    ReservasModule,
+
+    // NODE.JS importo la librería para leer el REST
+    HttpClientModule
   ],
+  // INJECTOR vamos a inyectar la información del Api DestinosApiClient
+  // por lo que se quita la importación y el provider
   providers: [
-    DestinosApiClient, AuthService, UsuarioLogueadoGuard
+    //DestinosApiClient, AuthService, UsuarioLogueadoGuard
+    AuthService, UsuarioLogueadoGuard,
+    // NODE.JS sin persistencia y sin deploy
+    { provide: APP_CONFIG, useValue: APP_CONFIG_VALUE },
+    // NODE.JS declaro mis proveedores de información
+    AppLoadService,
+    { provide: APP_INITIALIZER, useFactory: init_app, deps: [AppLoadService], multi: true}
   ],
   bootstrap: [AppComponent]
 })

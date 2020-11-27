@@ -9,7 +9,9 @@ import { DestinosViajesState, ElegidoFavoritoAction, NuevoDestinoAction } from '
 @Component({
   selector: 'app-lista-destinos',
   templateUrl: './lista-destinos.component.html',
-  styleUrls: ['./lista-destinos.component.css']
+  styleUrls: ['./lista-destinos.component.css'],
+// INJECTOR Forma 1: vamos a inyectar la información del Api DestinosApiClient
+  providers: [DestinosApiClient]
 })
 
 export class ListaDestinosComponent implements OnInit {
@@ -17,16 +19,18 @@ export class ListaDestinosComponent implements OnInit {
   updates: string[];
   all;
 
-  constructor( private destinosApiClient: DestinosApiClient, private store: Store<AppState>) {
+  constructor(
+    private destinosApiClient: DestinosApiClient,
+    private store: Store<AppState>) {
     this.onItemAdded = new EventEmitter();
     this.updates = [];
-    this.store.select ( state => state.destinos.favorito )
-      .subscribe (d => {
-        if (d != null ) {
-          this.updates.push ('Se ha elegido a' + d.nombre);
-        }
-    });
-    store.select(state => state.destinos.items ).subscribe(items => this.all = items );
+    //this.store.select ( state => state.destinos.favorito )
+    //  .subscribe (d => {
+    //    if (d != null ) {
+    //      this.updates.push ('Se ha elegido a' + d.nombre);
+    //    }
+    //  });
+    //  store.select(state => state.destinos.items ).subscribe(items => this.all = items );
   }
 
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Inject, InjectionToken, forwardRef } from '@angular/core';
 // VALIDATOR: Importo modulos para agrupar controles
 import {FormGroup,FormBuilder, Validators, FormControl, ValidatorFn} from '@angular/forms';
 
@@ -8,6 +8,7 @@ import {fromEvent} from 'rxjs';
 import {map, filter, debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {ajax} from 'rxjs/ajax';
 
+import { APP_CONFIG, AppConfig } from 'src/app/app.module';
 import {DestinoViaje} from './../../models/destino-viaje.model';
 
 @Component({
@@ -21,13 +22,17 @@ export class FormDestinoViajeComponent implements OnInit {
   // VALIDATOR: Declaro una variable
   //para el grupo de controles que será validado
   fg: FormGroup;
-  minLongitud=3;
+  minLongitud=5;
 
   // OBSERVABLE declaro un array de una cadena
   searchResults: string[];
 
   // VALIDATOR: armo el formulario con FormBuilder
-  constructor(fb: FormBuilder) {
+  // constructor(fb: FormBuilder) {
+
+ // NODE.JS sin persistencia y sin deploy
+ // Inyecto información al form de destino
+  constructor(fb: FormBuilder, @Inject(forwardRef(() => APP_CONFIG)) private config: AppConfig) {
     this.onItemAdded=new EventEmitter();
     this.fg=fb.group({
       nombre: ['', Validators.compose([
@@ -41,6 +46,12 @@ export class FormDestinoViajeComponent implements OnInit {
     this.fg.valueChanges.subscribe((form: any) => {
       console.log('cambio el formulario: ', form);
     });
+
+    this.fg.controls['nombre'].valueChanges.subscribe(
+      (value: string) => {
+        console.log ('nombre cambió: ', value);
+      }
+    );
   }
 
   ngOnInit(){
@@ -53,7 +64,9 @@ export class FormDestinoViajeComponent implements OnInit {
       filter(text => text.length > 2),
       debounceTime(200),
       distinctUntilChanged(),
-      switchMap(() => ajax('/assets/datos.json'))
+      // NODE.JS sin persistencia y sin deploy
+      //switchMap(() => ajax('/assets/datos.json'))
+      switchMap((text: string) => ajax(this.config.apiEndpoint + '/ciudades?q=' + text))
     ).subscribe(ajaxResponse => {
       this.searchResults = ajaxResponse.response;
     });
@@ -77,8 +90,8 @@ export class FormDestinoViajeComponent implements OnInit {
   nombreValidatorParametrizable(minLong: number): ValidatorFn{
     return (control: FormControl): {[s:string]: boolean}|null => {
       const l=control.value.toString().trim().length;
-      if(l>0 && l<minLong){
-        return {minLoingNombre: true};
+      if(l>0 && l< this.minLongitud ){
+        return {invalidNombre: true};
       }
       return null;
     }

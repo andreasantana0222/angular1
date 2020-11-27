@@ -5,6 +5,9 @@ import {Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DestinoViaje } from './destino-viaje.model';
 
+// NODE.JS importo la librería para leer el REST
+import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest } from "@angular/common/http";
+
 // ESTADO
 export interface DestinosViajesState{
   items: DestinoViaje[];
@@ -12,13 +15,20 @@ export interface DestinosViajesState{
   favorito: DestinoViaje;
 }
 
-export const initializeDestinosViajesState = function () {
-  return {
-    items: [],
-    loading: false,
-    favorito: null
+//export const initializeDestinosViajesState = function () {
+//  return {
+//    items: [],
+//    loading: false,
+//    favorito: null
+//  }
+//}
 
-  }
+export function initializeDestinosViajesState() {
+  return {
+      items: [],
+      loading: false,
+      favorito: null
+    };
 }
 
 // ACCIONES
@@ -26,7 +36,9 @@ export enum DestinosViajesActionTypes{
   NUEVO_DESTINO = '[Destinos Viajes] Nuevo',
   ELEGIDO_FAVORITO = '[Destinos Viajes] Favorito',
   VOTE_UP = '[Destinos Viajes] Vote Up',
-  VOTE_DOWN = '[Destinos Viajes] Vote Down'
+  VOTE_DOWN = '[Destinos Viajes] Vote Down',
+  // NODE.JS acción
+  INIT_MY_DATA = '[Destinos Viajes] Init My Data'
 }
 
 export class NuevoDestinoAction implements Action {
@@ -48,8 +60,15 @@ export class VoteDownAction implements Action {
   constructor(public destino: DestinoViaje){}
 }
 
+// NODE.JS acción class
+export class InitMyDataAction implements Action {
+  type = DestinosViajesActionTypes.INIT_MY_DATA;
+  constructor(public destinos: string[]){}
+}
+
+// NODE.JS acción tipo
 export type DestinosViajesActions = NuevoDestinoAction | ElegidoFavoritoAction
- | VoteUpAction | VoteDownAction;
+ | VoteUpAction | VoteDownAction | InitMyDataAction;
 
 
 // REDUCERS
@@ -58,7 +77,15 @@ export function reducerDestinosViajes (
   action: DestinosViajesActions
 ) : DestinosViajesState {
   switch (action.type) {
+    // NODE.JS acción case
 
+    case DestinosViajesActionTypes.INIT_MY_DATA: {
+      const destinos: string [] = (action as InitMyDataAction).destinos;
+      return {
+        ...state,
+        items: destinos.map((d) => new DestinoViaje (d, ''))
+      };
+    }
     case DestinosViajesActionTypes.NUEVO_DESTINO: {
       return {
         ...state,
