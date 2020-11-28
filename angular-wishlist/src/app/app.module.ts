@@ -14,6 +14,11 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 // NODE.JS importo la librería para leer el REST
 import { HttpClientModule, HttpClient, HttpHeaders, HttpRequest } from "@angular/common/http";
+// TRANSLATE
+import { TranslateService, TranslateLoader, TranslateModule } from "@ngx-translate/core";
+// OBSERVABLE para la actualización asincrónica
+import { Observable, throwError, from } from 'rxjs';
+import { flatMap } from 'rxjs/operators';
 
 import { environment } from '../environments/environment'; // Angular CLI environment
 import { AppRoutingModule } from './app-routing.module';
@@ -132,22 +137,89 @@ class AppLoadService {
 
 
 // dexie db init
-@Injectable({
-  providedIn: 'root'
-})
+// @Injectable({
+//   providedIn: 'root'
+// })
+//
+// export class MyDatabase extends Dexie {
+//   destinos: Dexie.Table<DestinoViaje, number>;
+//   constructor () {
+//     super ('MyDatabase');
+//     // primer version de la base de datos
+//     this.version(1).stores({
+//       destinos: '++id, nombre, url',
+//     });
+//   }
+// }
+// export const db = new MyDatabase();
+// // dexie db fin
 
-export class MyDatabase extends Dexie {
-  destinos: Dexie.Table<DestinoViaje, number>;
-  constructor () {
-    super ('MyDatabase');
-    // primer version de la base de datos
-    this.version(1).stores({
-      destinos: '++id, nombre, url',
-    });
+// dexie db init
+export class Translation {
+  constructor(public id: number, public lang: string, public key: string, public value: string) {}
+}
+@Injectable({
+   providedIn: 'root'
+ })
+ export class MyDatabase extends Dexie {
+    destinos: Dexie.Table<DestinoViaje, number>;
+    translations: Dexie.Table<Translation, number>;
+   constructor () {
+      super ('MyDatabase');
+     // primer version de la base de datos
+     this.version(1).stores({
+       destinos: '++id, nombre, url'
+     });
+     // segunda version de la base de datos
+     this.version(2).stores({
+       destinos: '++id, nombre, url',
+       translations: '++id, lang, key, value'
+     });
+   }
+ }
+ export const db = new MyDatabase();
+// dexie db fin
+
+// i18n init
+class TranslationLoader implements TranslateLoader {
+  constructor( private http: HttpClient ) {}
+  getTranslation(lang: string): Observable<any> {
+    const promise = db.translations
+      .where('lang')
+      .equals(lang)
+      .toArray()
+      .then(results => {
+        if (results.length ===0){
+          // si no encuentra valores ingresa en este if
+          // y devuelve una promesa de buscar los valores a la api
+          return this.http
+          .get<Translation[]>(APP_CONFIG_VALUE.apiEndpoint + '/api/translation?lang=' + lang)
+          .toPromise()
+          .then(apiResults => {
+            // guarda los resultados en la bd de dexie
+            db.translations.bulkAdd(apiResults);
+            return apiResults;
+          });
+        }
+        // si encontró valores en memoria devuelve esos valores
+        return results;
+      }).then((traducciones) => {
+        console.log('traducciones cargadas:');
+        console.log(traducciones);
+        return traducciones;
+      }).then((traducciones) => {
+        return traducciones.map((t) => ({ [t.key]: t.value}));
+      });
+      return from(promise).pipe(flatMap((elems) => from(elems)));
   }
 }
-export const db = new MyDatabase();
-// dexie db fin
+function HttpLoaderFactory(http: HttpClient) {
+  return new TranslationLoader(http);
+}
+// i18n fin
+
+
+
 
 @NgModule({
   declarations: [
@@ -185,7 +257,15 @@ export const db = new MyDatabase();
     HttpClientModule,
 
     // Base de datos dexie
-    MyDatabase
+    //MyDatabase,
+
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: (HttpLoaderFactory),
+        deps: [HttpClient]
+      }
+    })
   ],
   // INJECTOR vamos a inyectar la información del Api DestinosApiClient
   // por lo que se quita la importación y el provider
